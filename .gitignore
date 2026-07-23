@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Experiment artifacts (keep results/, ignore bulky captures)
+*.pcap
+*.pcapng
+experiments/results/**/raw/
+*.log
+
+# OS
+.DS_Store
+
+# Editors
+.vscode/
+.idea/
