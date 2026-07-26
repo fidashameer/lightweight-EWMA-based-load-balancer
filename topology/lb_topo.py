@@ -52,7 +52,7 @@ def build(servers=3, clients=4, ctrl_ip="127.0.0.1", ctrl_port=6653,
     info("*** Adding %d clients\n" % clients)
     client_hosts = []
     for i in range(1, clients + 1):
-        c = net.addHost("c%d" % i, ip="10.0.1.%d/24" % i)
+        c = net.addHost("c%d" % i, ip="10.0.0.%d/24" % (i + 10))
         net.addLink(c, s1, bw=link_bw, delay=link_delay)
         client_hosts.append(c)
 
