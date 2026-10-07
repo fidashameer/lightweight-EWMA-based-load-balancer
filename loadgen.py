@@ -50,7 +50,8 @@ def main():
     ap.add_argument("--vip", default="10.0.0.100")
     ap.add_argument("--port", type=int, default=8000)
     ap.add_argument("--n", type=int, default=200, help="number of requests")
-    ap.add_argument("--pattern", choices=["burst", "ramp", "steady"], default="burst")
+    ap.add_argument("--pattern", choices=["burst", "ramp", "steady", "trace"], default="burst")
+    ap.add_argument("--trace-file", default="traces/worldcup_profile.json")
     ap.add_argument("--duration", type=float, default=10.0,
                     help="seconds over which to spread requests (ramp/steady)")
     ap.add_argument("--timeout", type=float, default=5.0)
@@ -59,11 +60,39 @@ def main():
     args = ap.parse_args()
 
     rows = []
+    _trace_offsets = None
+    if args.pattern == "trace":
+        import json as _json, os as _os
+        _tf = args.trace_file
+        if not _os.path.exists(_tf):
+            _tf = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)),
+                                "traces", "worldcup_profile.json")
+        _prof = _json.load(open(_tf))["requests_per_second"]
+        _tot = float(sum(_prof)) or 1.0
+        _cum, _run = [], 0.0
+        for _c in _prof:
+            _run += _c
+            _cum.append(_run / _tot)
+        _nsec = len(_prof)
+        _trace_offsets = []
+        for _k in range(args.n):
+            _f = (_k + 0.5) / args.n
+            _lo = 0
+            while _lo < _nsec and _cum[_lo] < _f:
+                _lo += 1
+            if _lo >= _nsec:
+                _lo = _nsec - 1
+            _prev = _cum[_lo - 1] if _lo > 0 else 0.0
+            _w = _cum[_lo] - _prev
+            _fin = (_f - _prev) / _w if _w > 0 else 0.0
+            _trace_offsets.append(args.duration * (_lo + _fin) / _nsec)
     t0 = time.time()
     for seq in range(args.n):
         # schedule: when should this request fire?
         if args.pattern == "burst":
             target = t0  # all at once, as fast as the loop allows
+        elif args.pattern == "trace":
+            target = t0 + _trace_offsets[seq]
         elif args.pattern == "steady":
             target = t0 + (args.duration * seq / max(args.n - 1, 1))
         else:  # ramp: quadratic spacing -> rate increases over time
