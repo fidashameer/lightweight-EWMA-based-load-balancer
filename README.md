@@ -70,6 +70,21 @@ and the academic L3 system) and is discussed in `docs/02-architecture.md` and th
 | Reactive least-load | 114.4 ± 55.8 | 109.0 ± 57.7 |
 | EWMA (proposed) | 111.2 ± 39.5 | 111.3 ± 24.1 |
 
+**Real event-driven trace (1998 World Cup flash crowd)**
+
+| Policy | Homogeneous | Heterogeneous |
+|---|---|---|
+| Round-robin | **90.2 ± 3.2** | **99.1 ± 2.1** |
+| Weighted RR | 92.6 ± 3.9 | 99.0 ± 1.8 |
+| Reactive least-load | 144.9 ± 20.2 | 116.2 ± 57.9 |
+| EWMA (proposed) | 100.7 ± 21.0 | 111.9 ± 25.9 |
+
+Replaying the busiest 120 s of the World Cup trace (inverse-CDF sampling of the
+recorded arrival timings) reproduces the synthetic result and exposes the
+load-aware policies' instability directly: least-load's P99 ranges from 82 ms to
+240 ms across identical heterogeneous runs, while round-robin holds ~99 ms with
+SD under 2 ms. See `traces/` and paper §V.F.
+
 An α-sweep (smoothing factor 0.1–0.9) shows a usable band at α ≈ 0.1–0.7 and a
 pathological collapse at α = 0.9. Full data in `experiments/results/`.
 
@@ -111,6 +126,22 @@ SERVER_WORK_MS=20,40,80 sudo -E python3 run_experiment.py \
     --out experiments/results/results_heterogeneous_7.csv
 ```
 
+**Real event-driven trace (1998 World Cup).** The arrival profile ships in
+`traces/worldcup_profile.json` (regenerate from the raw log with
+`traces/parse_wc.py`). Replay it by swapping the pattern:
+
+```bash
+SERVER_WORK_MS=40 sudo -E python3 run_experiment.py \
+    --policies rr wrr least ewma --patterns trace \
+    --runs 7 --clients 4 --n 120 \
+    --out experiments/results/results_homogeneous_7.csv
+
+SERVER_WORK_MS=20,40,80 sudo -E python3 run_experiment.py \
+    --policies rr wrr least ewma --patterns trace \
+    --runs 7 --clients 4 --n 120 \
+    --out experiments/results/results_heterogeneous_7.csv
+```
+
 ## Related work
 
 Tracked in `docs/references.md`. This project is positioned as an incremental,
@@ -124,4 +155,7 @@ Complete. All four controllers implemented and verified; full experiment matrix 
 across two server scenarios with statistical reporting; IEEE-format paper written.
 Submitted for course Review 0 (ranked #5 of the cohort, "Proceed with Refinement");
 subsequent refinements — refined title, explicit differentiation, and statistical
-significance via 7-run mean ± SD — are reflected here and in `paper/`.
+significance via 7-run mean ± SD — are reflected here and in `paper/`. The
+flash-crowd model is additionally validated against a real event-driven trace
+(1998 World Cup), which reproduces the negative result; see paper §V.F and
+`traces/`.
