@@ -36,6 +36,9 @@ POLICY_FILES = {
     "wrr":   "src/lb_weighted.py",
     "least": "src/lb_leastload.py",
     "ewma":  "src/lb_ewma.py",
+    "conn":  "src/lb_conn.py",
+    "rt":    "src/lb_rt.py",
+    "cap":   "src/lb_capacity.py",
 }
 VIP = "10.0.0.100"
 HTTP_PORT = 8000
