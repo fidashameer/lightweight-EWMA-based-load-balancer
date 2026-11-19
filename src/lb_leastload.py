@@ -15,6 +15,7 @@ This implements the "SDN-native flow-stats load signal" from docs/02-architectur
 Run:  ryu-manager src/lb_leastload.py
 """
 
+import os
 from ryu.base import app_manager
 from ryu.controller import ofp_event
 from ryu.controller.handler import CONFIG_DISPATCHER, MAIN_DISPATCHER, set_ev_cls
@@ -24,7 +25,7 @@ from ryu.lib import hub
 
 VIRTUAL_IP = "10.0.0.100"
 VIRTUAL_MAC = "00:00:00:00:00:fe"
-POLL_INTERVAL = 2  # seconds between port-stats polls
+POLL_INTERVAL = float(os.environ.get("POLL_INTERVAL", "2"))
 
 SERVERS = [
     {"ip": "10.0.0.1", "mac": "00:00:00:00:00:01", "port": 1},

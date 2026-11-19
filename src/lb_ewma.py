@@ -37,7 +37,7 @@ from ryu.lib import hub
 
 VIRTUAL_IP = "10.0.0.100"
 VIRTUAL_MAC = "00:00:00:00:00:fe"
-POLL_INTERVAL = 2
+POLL_INTERVAL = float(os.environ.get("POLL_INTERVAL", "2"))
 ALPHA = float(os.environ.get("EWMA_ALPHA", "0.3"))  # smoothing factor, swept in experiments
 
 SERVERS = [

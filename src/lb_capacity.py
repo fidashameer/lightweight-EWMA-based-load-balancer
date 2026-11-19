@@ -43,7 +43,7 @@ PORT_TO_IDX = {s["port"]: i for i, s in enumerate(SERVERS)}
 
 
 def server_work_times(n):
-    raw = os.environ.get("SERVER_WORK_MS", "30")
+    raw = os.environ.get("CAP_EST_MS") or os.environ.get("SERVER_WORK_MS", "30")
     vals = []
     for v in raw.split(","):
         v = v.strip()
